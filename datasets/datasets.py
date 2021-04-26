@@ -17,7 +17,7 @@ def get_secreq_dataset(path):
         X_train, X_test, y_train, y_test = train_test_split(texts, labels, test_size=0.1, random_state=42)
         return X_train, X_test, y_train, y_test
 
-    train_texts, test_texts, train_labels, test_labels = read_dataset('secreq')
+    train_texts, test_texts, train_labels, test_labels = read_dataset(path)
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
     class SecReqDataset(torch.utils.data.Dataset):
@@ -116,7 +116,6 @@ def get_riaz_dataset(path):
 def get_own_dataset(path):
 
     def read_csv_dataset(path):
-        texts, labels, origin = [], [], []
         df = pd.read_csv(path, sep=',')
         df = df[['Requirement', 'Context (Keywords)', 'Name of Doc', 'Label', 'Comments.1']]
         df.columns = ['text', 'context', 'doc', 'label', 'comments']
@@ -140,7 +139,7 @@ def get_own_dataset(path):
 
         return df, encode_dict
 
-    df, encode_dict = read_csv_dataset('/content/PURE_and_others.csv')
+    df, encode_dict = read_csv_dataset(path)
 
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
