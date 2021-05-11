@@ -5,6 +5,7 @@ import json
 from sklearn.model_selection import train_test_split
 from transformers import DistilBertTokenizerFast
 
+
 def get_secreq_dataset(path):
     def read_dataset(path):
         texts, labels = [], []
@@ -44,7 +45,6 @@ def get_secreq_dataset(path):
 
 
 def get_riaz_dataset(path):
-
     def read_json_dataset(path):
         texts, labels = [], []
         listdir = os.listdir(path)
@@ -113,12 +113,12 @@ def get_riaz_dataset(path):
     test_dataset = RiazDataset(test_encodings, test_labels)
     return train_dataset, test_dataset, encode_dict
 
-def get_own_dataset(path):
 
+def get_compiled_dataset(path, allowed_labelers=['Vasily', '']):
     def read_csv_dataset(path):
         df = pd.read_csv(path, sep=',')
-        df = df[['Requirement', 'Context (Keywords)', 'Name of Doc', 'Label', 'Comments.1']]
-        df.columns = ['text', 'context', 'doc', 'label', 'comments']
+        df = df[['Requirement', 'Context (Keywords)', 'Name of Doc', 'Label', 'Comments.1', 'Labeled by.1']]
+        df.columns = ['text', 'context', 'doc', 'label', 'comments', 'labeler']
 
         # clean data from mess for timebeing
 
@@ -126,6 +126,10 @@ def get_own_dataset(path):
                         & (df['label'] != 'Availability') \
                         & (df['label'] != 'Integrity') & (df['label'] != 'Operational') & \
                         (df['label'] != 'Accountability')].index)
+
+        # clean from dirty labelers
+
+        df = df[~df['label'].isin(allowed_labelers)]
 
         encode_dict = {}
 
