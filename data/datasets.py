@@ -114,22 +114,19 @@ def get_riaz_dataset(path):
     return train_dataset, test_dataset, encode_dict
 
 
-def get_compiled_dataset(path, allowed_labelers=['Vasily', '']):
+def get_compiled_dataset(path, allowed_labelers=['Vasily', ''], allowed_labels=['Access control', 'Confidentiality',
+                                                                                'Availability', 'Integrity',
+                                                                                'Operational', 'Accountability']):
     def read_csv_dataset(path):
         df = pd.read_csv(path, sep=',')
         df = df[['Requirement', 'Context (Keywords)', 'Name of Doc', 'Label', 'Comments.1', 'Labeled by.1']]
         df.columns = ['text', 'context', 'doc', 'label', 'comments', 'labeler']
 
-        # clean data from mess for timebeing
+        # filter labels
+        df = df[(df['label'].isin(allowed_labels))]
 
-        df = df.drop(df[(df['label'] != 'Access control') & (df['label'] != 'Confidentiality') \
-                        & (df['label'] != 'Availability') \
-                        & (df['label'] != 'Integrity') & (df['label'] != 'Operational') & \
-                        (df['label'] != 'Accountability')].index)
-
-        # clean from dirty labelers
-
-        df = df[~df['label'].isin(allowed_labelers)]
+        # filter labelers
+        df = df[(df['labeler'].isin(allowed_labelers))]
 
         encode_dict = {}
 
