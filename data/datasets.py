@@ -114,7 +114,7 @@ def get_riaz_dataset(path):
     return train_dataset, test_dataset, encode_dict
 
 
-def get_compiled_dataset(path, allowed_labelers=['Vasily', ''], allowed_labels=['Access control', 'Confidentiality',
+def get_compiled_dataset(path, allowed_labelers=['Vasily', 'Aydar'], allowed_labels=['Access control', 'Confidentiality',
                                                                                 'Availability', 'Integrity',
                                                                                 'Operational', 'Accountability']):
     def read_csv_dataset(path):
