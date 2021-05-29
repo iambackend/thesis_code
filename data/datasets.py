@@ -2,7 +2,7 @@ import pandas as pd
 import os
 import torch
 import json
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, KFold
 from transformers import DistilBertTokenizerFast
 
 
@@ -114,9 +114,23 @@ def get_riaz_dataset(path):
     return train_dataset, test_dataset, encode_dict
 
 
-def get_compiled_dataset(path, allowed_labelers=['Vasily', 'Aydar'], allowed_labels=['Access control', 'Confidentiality',
-                                                                                'Availability', 'Integrity',
-                                                                                'Operational', 'Accountability']):
+def get_compiled_dataset(path: str, type: str = "split", test_size: float = 0.1,
+                         allowed_labelers: list = ['Vasily', 'Aydar'],
+                         allowed_labels: list = ['Access control', 'Confidentiality', 'Availability', 'Integrity',
+                                                 'Operational', 'Accountability']):
+    """
+
+    :param path: path to dataset file
+    :param type (optional): either 'split' or '10-fold': 'split' will split data to train and test datasets, '10-fold' will split data into 10 train/test splits.
+    :param test_size (optional): how big test dataset is, used only if type is 'split'
+    :param allowed_labelers (optional): samples from which labelers are allowed
+    :param allowed_labels (optional): samples with which labels are allowed
+    :return: This function returns three objects:
+        - train – train dataset or list of train datasets if ``type`` was set to 'split'
+        - test – test dataset or list of test datasets if `type` was set to 'split'
+        - encode_dict – dictionary which maps labels' names to labels' ids
+    """
+
     def read_csv_dataset(path):
         df = pd.read_csv(path, sep=',')
         df = df[['Requirement', 'Context (Keywords)', 'Name of Doc', 'Label', 'Comments.1', 'Labeled by.1']]
@@ -161,9 +175,19 @@ def get_compiled_dataset(path, allowed_labelers=['Vasily', 'Aydar'], allowed_lab
 
     tokenizer = DistilBertTokenizerFast.from_pretrained('distilbert-base-uncased')
 
-    train, test = train_test_split(df, test_size=0.1, random_state=42)
-
-    train_dataset = OwnDataset(train, tokenizer)
-    test_dataset = OwnDataset(test, tokenizer)
+    if type == "split":
+        train, test = train_test_split(df, test_size=test_size, random_state=42)
+        train_dataset = OwnDataset(train, tokenizer)
+        test_dataset = OwnDataset(test, tokenizer)
+    elif type == "10-fold":
+        kfold = KFold(n_splits=10, shuffle=True, random_state=42)
+        train_dataset, test_dataset = [], []
+        for train_index, val_index in kfold.split(df):
+            train_df = df.iloc[train_index]
+            val_df = df.iloc[val_index]
+            train_dataset.append(OwnDataset(train_df, tokenizer))
+            test_dataset.append(OwnDataset(val_df, tokenizer))
+    else:
+        raise ValueError("type is either 'split' or '10-fold'")
 
     return train_dataset, test_dataset, encode_dict

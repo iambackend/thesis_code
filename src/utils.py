@@ -16,8 +16,7 @@ def compute_metrics(pred):
         'f1': f1
     }
 
-
-def show_confusion_matrix(model, dataset, encode_dict):
+def predict(model, dataset, encode_dict):
     model.eval()
     y_true, y_pred = [], []
 
@@ -33,10 +32,14 @@ def show_confusion_matrix(model, dataset, encode_dict):
         y_pred.append(model_predictions.item())
 
     decode_dict = {value: key for key, value in encode_dict.items()}
-    categories = [key for key in encode_dict.keys()]
-    y_true = pd.Categorical([decode_dict[y] for y in y_true], categories=categories)
-    y_pred = pd.Categorical([decode_dict[y] for y in y_pred], categories=categories)
+    y_true = [decode_dict[y] for y in y_true]
+    y_pred = [decode_dict[y] for y in y_pred]
+    return y_true, y_pred
 
+def show_confusion_matrix(y_true, y_pred, encode_dict):
+    categories = [key for key in encode_dict.keys()]
+    y_true = pd.Categorical(y_true, categories=categories)
+    y_pred = pd.Categorical(y_pred, categories=categories)
     confusion_matrix = pd.crosstab(y_true, y_pred, dropna=False, rownames=['Actual'], colnames=['Predicted'])
 
     fig, ax = plt.subplots(figsize=(10, 10))
