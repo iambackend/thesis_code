@@ -44,6 +44,6 @@ def show_confusion_matrix(y_true, y_pred, encode_dict, normalized=True):
                                    normalize='index' if normalized else False)
 
     fig, ax = plt.subplots(figsize=(10, 10))
-    sn.heatmap(confusion_matrix, annot=True, fmt="f" if normalized else "d")
+    sn.heatmap(confusion_matrix, annot=True, fmt=".2f" if normalized else "d")
     plt.show()
     return None
