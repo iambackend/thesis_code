@@ -7,7 +7,7 @@ import pandas as pd
 def compute_metrics(pred):
     labels = pred.label_ids
     preds = pred.predictions.argmax(-1)
-    precision, recall, f1, _ = precision_recall_fscore_support(labels, preds, average='macro')
+    precision, recall, f1, _ = precision_recall_fscore_support(labels, preds, average='macro', zero_division = 0)
     acc = accuracy_score(labels, preds)
     return {
         'accuracy': acc,
@@ -36,11 +36,12 @@ def predict(model, dataset, encode_dict):
     y_pred = [decode_dict[y] for y in y_pred]
     return y_true, y_pred
 
-def show_confusion_matrix(y_true, y_pred, encode_dict):
+def show_confusion_matrix(y_true, y_pred, encode_dict, normalized=True):
     categories = [key for key in encode_dict.keys()]
     y_true = pd.Categorical(y_true, categories=categories)
     y_pred = pd.Categorical(y_pred, categories=categories)
-    confusion_matrix = pd.crosstab(y_true, y_pred, dropna=False, rownames=['Actual'], colnames=['Predicted'])
+    confusion_matrix = pd.crosstab(y_true, y_pred, dropna=False, rownames=['Actual'], colnames=['Predicted'],
+                                   normalized='index' if normalized else False)
 
     fig, ax = plt.subplots(figsize=(10, 10))
     sn.heatmap(confusion_matrix, annot=True, fmt="d")
