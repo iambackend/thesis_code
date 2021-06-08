@@ -41,7 +41,7 @@ def show_confusion_matrix(y_true, y_pred, encode_dict, normalized=True):
     y_true = pd.Categorical(y_true, categories=categories)
     y_pred = pd.Categorical(y_pred, categories=categories)
     confusion_matrix = pd.crosstab(y_true, y_pred, dropna=False, rownames=['Actual'], colnames=['Predicted'],
-                                   normalized='index' if normalized else False)
+                                   normalize='index' if normalized else False)
 
     fig, ax = plt.subplots(figsize=(10, 10))
     sn.heatmap(confusion_matrix, annot=True, fmt="d")
